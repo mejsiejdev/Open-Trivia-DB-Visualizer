@@ -160,7 +160,7 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
             ))}
             {selectedCategories.length > 0 && (
               <Button
-                className="px-3 py-1 text-sm font-medium ml-2 cursor-pointer"
+                className="px-3 py-1 text-sm font-medium sm:ml-2 cursor-pointer"
                 variant="outline"
                 onClick={clearSelection}
                 type="button"

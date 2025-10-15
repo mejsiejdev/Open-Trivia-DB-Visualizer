@@ -10,7 +10,7 @@ export default async function Home() {
   const data = json.results;
 
   return (
-    <div className="font-sans flex flex-col items-center justify-center min-h-screen p-8">
+    <div className="font-sans flex flex-col items-center justify-center min-h-screen p-4 sm:p-8">
       <main className="w-full container flex flex-col items-start gap-4">
         <div className="px-4 flex flex-col gap-2 w-full">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 w-full">
