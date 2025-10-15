@@ -46,7 +46,8 @@ export default async function Home() {
         </div>
         {!data ? (
           <div className="text-lg flex flex-row items-center gap-2">
-            <Spinner /> Loading data from the API...
+            <Spinner /> Loading data from the API, if this takes too long,
+            please try refreshing the page.
           </div>
         ) : (
           <Charts data={data} />
