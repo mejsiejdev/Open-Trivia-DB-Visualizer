@@ -245,7 +245,6 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
                     cx="50%"
                     cy="50%"
                     outerRadius={150}
-                    m
                     dataKey="value"
                     label={({ name, value }) => `${name}: ${value}`}
                     className="capitalize"
