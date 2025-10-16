@@ -107,13 +107,22 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
     },
     {}
   );
-  const difficultyData = Object.entries(difficultyCounts).map(
-    ([name, value], index) => ({
+  const difficultyOrder = ["easy", "medium", "hard"];
+  const difficultyData = Object.entries(difficultyCounts)
+    .map(([name, value], index) => ({
       name,
       value,
       fill: getRandomColor(index),
-    })
-  );
+    }))
+    .sort((a, b) => {
+      const aIndex = difficultyOrder.indexOf(a.name);
+      const bIndex = difficultyOrder.indexOf(b.name);
+      // Unknown difficulties go last
+      if (aIndex === -1 && bIndex === -1) return 0;
+      if (aIndex === -1) return 1;
+      if (bIndex === -1) return -1;
+      return aIndex - bIndex;
+    });
 
   // Toggle category selection
   const toggleCategory = (catName: string) => {
@@ -138,26 +147,28 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
             Select one or more categories to filter the difficulty chart below.
           </ItemContent>
           <div className="flex flex-wrap gap-2 mb-2">
-            {categoryData.map((cat) => (
-              <Button
-                key={cat.name}
-                className={`px-3 py-1 text-sm font-medium transition-opacity cursor-pointer text-white ${
-                  selectedCategories.length > 0 &&
-                  !selectedCategories.includes(cat.name)
-                    ? "opacity-50"
-                    : ""
-                }`}
-                style={{
-                  backgroundColor: cat.fill,
-                }}
-                onClick={() => toggleCategory(cat.name)}
-                type="button"
-                tabIndex={0}
-                aria-pressed={selectedCategories.includes(cat.name)}
-              >
-                {cat.name}
-              </Button>
-            ))}
+            {[...categoryData]
+              .sort((a, b) => b.value - a.value)
+              .map((cat) => (
+                <Button
+                  key={cat.name}
+                  className={`px-3 py-1 text-sm font-medium transition-opacity cursor-pointer text-white ${
+                    selectedCategories.length > 0 &&
+                    !selectedCategories.includes(cat.name)
+                      ? "opacity-50"
+                      : ""
+                  }`}
+                  style={{
+                    backgroundColor: cat.fill,
+                  }}
+                  onClick={() => toggleCategory(cat.name)}
+                  type="button"
+                  tabIndex={0}
+                  aria-pressed={selectedCategories.includes(cat.name)}
+                >
+                  {cat.name}
+                </Button>
+              ))}
             {selectedCategories.length > 0 && (
               <Button
                 className="px-3 py-1 text-sm font-medium sm:ml-2 cursor-pointer"
@@ -218,6 +229,8 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
                         <Cell
                           key={`cell-${entry.name}`}
                           fill={entry.fill}
+                          className="cursor-pointer"
+                          onClick={() => toggleCategory(entry.name)}
                           opacity={isSelected ? 1 : 0.4}
                         />
                       );
@@ -239,25 +252,19 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
               className="min-h-[300px] sm:min-h-[500px] h-full w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={difficultyData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={150}
-                    dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}`}
+                <BarChart
+                  data={difficultyData}
+                  width={Math.max(300, difficultyData.length * 120)}
+                  height={300}
+                  accessibilityLayer
+                >
+                  <XAxis
+                    dataKey="name"
+                    type="category"
                     className="capitalize"
-                  >
-                    {difficultyData.map((entry, index) => {
-                      let fill = entry.fill;
-                      if (entry.name === "easy") fill = "#22c55e";
-                      else if (entry.name === "medium") fill = "#facc15";
-                      else if (entry.name === "hard") fill = "#ef4444";
-                      return <Cell key={`cell-${index}`} fill={fill} />;
-                    })}
-                  </Pie>
-                  <Legend className="capitalize" />
+                  />
+                  <YAxis type="number" />
+                  <CartesianGrid strokeDasharray="3 3" />
                   <Tooltip
                     content={({ active, payload }) => {
                       if (!active || !payload || !payload.length) return null;
@@ -271,7 +278,16 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
                       );
                     }}
                   />
-                </PieChart>
+                  <Bar dataKey="value" barSize={60}>
+                    {difficultyData.map((entry, index) => {
+                      let fill = entry.fill;
+                      if (entry.name === "easy") fill = "#22c55e";
+                      else if (entry.name === "medium") fill = "#facc15";
+                      else if (entry.name === "hard") fill = "#ef4444";
+                      return <Cell key={`cell-${index}`} fill={fill} />;
+                    })}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
