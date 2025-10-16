@@ -263,7 +263,7 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
                     type="category"
                     className="capitalize"
                   />
-                  <YAxis type="number" />
+                  <YAxis type="number" width={20} />
                   <CartesianGrid strokeDasharray="3 3" />
                   <Tooltip
                     content={({ active, payload }) => {
