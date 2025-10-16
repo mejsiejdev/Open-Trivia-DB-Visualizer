@@ -144,7 +144,8 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
             Available question categories
           </ItemTitle>
           <ItemContent className="mb-2 text-muted-foreground text-sm">
-            Select one or more categories to filter the difficulty chart below.
+            Select one or more categories to filter the charts below (you can
+            also click on the bars in category chart).
           </ItemContent>
           <div className="flex flex-wrap gap-2 mb-2">
             {[...categoryData]
