@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Open Trivia DB Visualizer
+
+This project is a web application that fetches trivia questions from the [Open Trivia DB API](https://opentdb.com/) and visualizes the data in an interactive way.
+
+<img width="1440" height="900" alt="image" src="https://github.com/user-attachments/assets/e9766e80-6508-4c55-8262-884190c184d3" />
+
+## Functionalities
+
+- **Data Visualization**: The application fetches trivia questions and displays the data in two interactive bar charts: one for question categories and one for question difficulty.
+- **Interactive Filtering**: Users can filter the difficulty chart by clicking on a category in the category chart or by selecting a category from the list. This allows for a more detailed view of the data.
+- **Dark/Light Theme**: The application supports both dark and light themes, which can be toggled by the user.
+- **Responsive Design**: The application is designed to be responsive and work on different screen sizes.
+
+## Technologies Used
+
+![Next.js](https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/typescript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/react-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Radix UI](https://img.shields.io/badge/radix%20ui-161618?style=for-the-badge&logo=radix-ui&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/tailwind%20css-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Recharts](https://img.shields.io/badge/recharts-8884d8?style=for-the-badge&logo=recharts&logoColor=white)
+![Lucide Icons](https://img.shields.io/badge/Lucide%20Icons-232931?style=for-the-badge&logo=lucide&logoColor=white)
+![Next Themes](https://img.shields.io/badge/next--themes-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
+![ESLint](https://img.shields.io/badge/eslint-4B32C3?style=for-the-badge&logo=eslint&logoColor=white)
 
 ## Getting Started
 
-First, run the development server:
+To run the project locally, follow these steps:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. **Clone the repository**:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+    ```bash
+    git clone https://github.com/mejsiejdev/open-trivia-db-visualizer.git
+    ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. **Install dependencies**:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+    ```bash
+    npm install
+    ```
 
-## Learn More
+3. **Run the development server**:
 
-To learn more about Next.js, take a look at the following resources:
+    ```bash
+    npm run dev
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
