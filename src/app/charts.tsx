@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
 import { type ChartConfig } from "@/components/ui/chart";
 import { Item, ItemTitle, ItemContent } from "@/components/ui/item";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ResponsiveContainer,
   Tooltip,
@@ -14,20 +14,9 @@ import {
   XAxis,
   YAxis,
   Cell,
-  PieChart,
-  Pie,
-  Legend,
   CartesianGrid,
 } from "recharts";
-
-interface TriviaQuestion {
-  category: string;
-  type: string;
-  difficulty: string;
-  question: string;
-  correct_answer: string;
-  incorrect_answers: string[];
-}
+import { TriviaQuestion } from "./page";
 
 const categoryChartConfig = {
   value: {
@@ -69,44 +58,42 @@ const getRandomColor = (index: number) =>
   COLOR_PALETTE[index % COLOR_PALETTE.length];
 
 export function Charts({ data }: { data: TriviaQuestion[] }) {
-  // Use array for multiple selection
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-  // Filter data by selectedCategories if any are set
   const filteredData =
     selectedCategories.length > 0
-      ? data.filter((q) => {
-          let cat = q.category ? q.category.replace(/&amp;/g, "&") : "Unknown";
-          cat = cat.includes(":") ? cat.split(":")[0].trim() : cat;
-          return selectedCategories.includes(cat);
-        })
+      ? data.filter(({ category }) => selectedCategories.includes(category))
       : data;
 
-  // Count questions per category (always use all data for categories)
-  const categoryCounts = data.reduce<Record<string, number>>((acc, q) => {
-    let cat = q.category ? q.category.replace(/&amp;/g, "&") : "Unknown";
-    cat = cat.includes(":") ? cat.split(":")[0].trim() : cat;
-    acc[cat] = (acc[cat] || 0) + 1;
-    return acc;
-  }, {});
-
-  const categoryData = Object.entries(categoryCounts).map(
-    ([name, value], index) => ({
-      name,
-      value,
-      fill: getRandomColor(index),
-    })
-  );
-
-  // Count questions per difficulty (filtered by selectedCategories)
-  const difficultyCounts = filteredData.reduce<Record<string, number>>(
-    (acc, q) => {
-      const diff = q.difficulty || "unknown";
-      acc[diff] = (acc[diff] || 0) + 1;
-      return acc;
+  const categoryCounts = data.reduce<Record<string, number>>(
+    (count, { category }) => {
+      count[category] = (count[category] || 0) + 1;
+      return count;
     },
     {}
   );
+
+  const categoryData = useMemo(
+    () =>
+      Object.entries(categoryCounts)
+        .map(([name, value], index) => ({
+          name,
+          value,
+          fill: getRandomColor(index),
+        }))
+        .sort((a, b) => b.value - a.value),
+    [categoryCounts]
+  );
+
+  const difficultyCounts = useMemo(
+    () =>
+      filteredData.reduce<Record<string, number>>((count, { difficulty }) => {
+        count[difficulty] = (count[difficulty] || 0) + 1;
+        return count;
+      }, {}),
+    [filteredData]
+  );
+
   const difficultyOrder = ["easy", "medium", "hard"];
   const difficultyData = Object.entries(difficultyCounts)
     .map(([name, value], index) => ({
@@ -117,24 +104,20 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
     .sort((a, b) => {
       const aIndex = difficultyOrder.indexOf(a.name);
       const bIndex = difficultyOrder.indexOf(b.name);
-      // Unknown difficulties go last
-      if (aIndex === -1 && bIndex === -1) return 0;
       if (aIndex === -1) return 1;
       if (bIndex === -1) return -1;
       return aIndex - bIndex;
     });
 
-  // Toggle category selection
-  const toggleCategory = (catName: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(catName)
-        ? prev.filter((c) => c !== catName)
-        : [...prev, catName]
+  const toggleCategory = (category: string) => {
+    setSelectedCategories((previous) =>
+      previous.includes(category)
+        ? previous.filter((c) => c !== category)
+        : [...previous, category].length === categoryData.length
+        ? []
+        : [...previous, category]
     );
   };
-
-  // Clear all selections
-  const clearSelection = () => setSelectedCategories([]);
 
   return (
     <div className="flex flex-col w-full">
@@ -148,33 +131,31 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
             also click on the bars in category chart).
           </ItemContent>
           <div className="flex flex-wrap gap-2 mb-2">
-            {[...categoryData]
-              .sort((a, b) => b.value - a.value)
-              .map((cat) => (
-                <Button
-                  key={cat.name}
-                  className={`px-3 py-1 text-sm font-medium transition-opacity cursor-pointer text-white ${
-                    selectedCategories.length > 0 &&
-                    !selectedCategories.includes(cat.name)
-                      ? "opacity-50"
-                      : ""
-                  }`}
-                  style={{
-                    backgroundColor: cat.fill,
-                  }}
-                  onClick={() => toggleCategory(cat.name)}
-                  type="button"
-                  tabIndex={0}
-                  aria-pressed={selectedCategories.includes(cat.name)}
-                >
-                  {cat.name}
-                </Button>
-              ))}
+            {categoryData.map((category) => (
+              <Button
+                key={category.name}
+                className={`px-3 py-1 text-sm font-medium transition-opacity cursor-pointer text-white ${
+                  selectedCategories.length > 0 &&
+                  !selectedCategories.includes(category.name)
+                    ? "opacity-50"
+                    : ""
+                }`}
+                style={{
+                  backgroundColor: category.fill,
+                }}
+                onClick={() => toggleCategory(category.name)}
+                type="button"
+                tabIndex={0}
+                aria-pressed={selectedCategories.includes(category.name)}
+              >
+                {category.name}
+              </Button>
+            ))}
             {selectedCategories.length > 0 && (
               <Button
                 className="px-3 py-1 text-sm font-medium sm:ml-2 cursor-pointer"
                 variant="outline"
-                onClick={clearSelection}
+                onClick={() => setSelectedCategories([])}
                 type="button"
               >
                 Clear
@@ -202,7 +183,7 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
                 layout="vertical"
                 height={categoryData.length * 40}
                 accessibilityLayer
-                data={[...categoryData].sort((a, b) => b.value - a.value)}
+                data={categoryData.sort((a, b) => b.value - a.value)}
               >
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={80} />
@@ -220,22 +201,20 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
                   }}
                 />
                 <Bar dataKey="value" barSize={20}>
-                  {[...categoryData]
-                    .sort((a, b) => b.value - a.value)
-                    .map((entry) => {
-                      const isSelected =
-                        selectedCategories.length === 0 ||
-                        selectedCategories.includes(entry.name);
-                      return (
-                        <Cell
-                          key={`cell-${entry.name}`}
-                          fill={entry.fill}
-                          className="cursor-pointer"
-                          onClick={() => toggleCategory(entry.name)}
-                          opacity={isSelected ? 1 : 0.4}
-                        />
-                      );
-                    })}
+                  {categoryData.map((category) => {
+                    const isSelected =
+                      selectedCategories.length === 0 ||
+                      selectedCategories.includes(category.name);
+                    return (
+                      <Cell
+                        key={`cell-${category.name}`}
+                        fill={category.fill}
+                        className="cursor-pointer"
+                        onClick={() => toggleCategory(category.name)}
+                        opacity={isSelected ? 1 : 0.4}
+                      />
+                    );
+                  })}
                 </Bar>
               </BarChart>
             </ChartContainer>
@@ -255,7 +234,10 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={difficultyData}
-                  width={Math.max(300, difficultyData.length * 120)}
+                  width={useMemo(
+                    () => Math.max(300, difficultyData.length * 120),
+                    [difficultyData]
+                  )}
                   height={300}
                   accessibilityLayer
                 >
@@ -280,11 +262,11 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
                     }}
                   />
                   <Bar dataKey="value" barSize={60}>
-                    {difficultyData.map((entry, index) => {
-                      let fill = entry.fill;
-                      if (entry.name === "easy") fill = "#22c55e";
-                      else if (entry.name === "medium") fill = "#facc15";
-                      else if (entry.name === "hard") fill = "#ef4444";
+                    {difficultyData.map((difficulty, index) => {
+                      let fill = difficulty.fill;
+                      if (difficulty.name === "easy") fill = "#22c55e";
+                      else if (difficulty.name === "medium") fill = "#facc15";
+                      else if (difficulty.name === "hard") fill = "#ef4444";
                       return <Cell key={`cell-${index}`} fill={fill} />;
                     })}
                   </Bar>

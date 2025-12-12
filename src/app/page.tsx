@@ -4,10 +4,25 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowUpRight } from "lucide-react";
 import { ThemeSwitch } from "@/components/theme-switch";
 
+export interface TriviaQuestion {
+  category: string;
+  type: string;
+  difficulty: string;
+}
+
 export default async function Home() {
   const res = await fetch("https://opentdb.com/api.php?amount=50");
   const json = await res.json();
-  const data = json.results;
+  const unprocessedData = json.results;
+  const data: TriviaQuestion[] = unprocessedData.map(
+    (question: TriviaQuestion) => ({
+      category: question.category.includes(":")
+        ? question.category.replace(/&amp;/g, "&").split(":")[0].trim()
+        : question.category.replace(/&amp;/g, "&"),
+      type: question.type,
+      difficulty: question.difficulty,
+    })
+  );
 
   return (
     <div className="font-sans flex flex-col items-center justify-center min-h-screen p-4 pt-8 sm:p-8">
