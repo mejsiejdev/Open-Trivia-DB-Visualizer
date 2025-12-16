@@ -135,3 +135,11 @@
     --chart-5: oklch(0.645 0.246 16.439);
   }
 }
+
+.chart-tooltip {
+  @apply bg-white border border-gray-300 text-black rounded-md p-2 text-sm shadow-sm;
+}
+
+.category-filter-button {
+  @apply px-3 py-1 text-sm font-medium transition-opacity cursor-pointer text-white;
+}

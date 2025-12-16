@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
 import { type ChartConfig } from "@/components/ui/chart";
 import { Item, ItemTitle, ItemContent } from "@/components/ui/item";
+import { cn } from "@/lib/utils";
 import { useMemo, useState } from "react";
 import {
   ResponsiveContainer,
@@ -17,6 +18,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { TriviaQuestion } from "./page";
+
 
 const categoryChartConfig = {
   value: {
@@ -31,6 +33,12 @@ const difficultyChartConfig = {
     color: "#fff",
   },
 } satisfies ChartConfig;
+
+const DIFFICULTY_COLORS = {
+  easy: "#22c55e", // green
+  medium: "#facc15", // yellow
+  hard: "#ef4444", // red
+};
 
 const COLOR_PALETTE = [
   "#3B82F6",
@@ -96,10 +104,10 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
 
   const difficultyOrder = ["easy", "medium", "hard"];
   const difficultyData = Object.entries(difficultyCounts)
-    .map(([name, value], index) => ({
+    .map(([name, value]) => ({
       name,
       value,
-      fill: getRandomColor(index),
+      fill: DIFFICULTY_COLORS[name as keyof typeof DIFFICULTY_COLORS],
     }))
     .sort((a, b) => {
       const aIndex = difficultyOrder.indexOf(a.name);
@@ -134,12 +142,12 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
             {categoryData.map((category) => (
               <Button
                 key={category.name}
-                className={`px-3 py-1 text-sm font-medium transition-opacity cursor-pointer text-white ${
+                className={cn(
+                  "category-filter-button",
                   selectedCategories.length > 0 &&
-                  !selectedCategories.includes(category.name)
-                    ? "opacity-50"
-                    : ""
-                }`}
+                    !selectedCategories.includes(category.name) &&
+                    "opacity-50"
+                )}
                 style={{
                   backgroundColor: category.fill,
                 }}
@@ -153,7 +161,7 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
             ))}
             {selectedCategories.length > 0 && (
               <Button
-                className="px-3 py-1 text-sm font-medium sm:ml-2 cursor-pointer"
+                className={cn("category-filter-button", "sm:ml-2")}
                 variant="outline"
                 onClick={() => setSelectedCategories([])}
                 type="button"
@@ -181,7 +189,6 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
             >
               <BarChart
                 layout="vertical"
-                height={categoryData.length * 40}
                 accessibilityLayer
                 data={categoryData.sort((a, b) => b.value - a.value)}
               >
@@ -193,7 +200,7 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
                     if (!active || !payload || !payload.length) return null;
                     const { name, value } = payload[0].payload;
                     return (
-                      <div className="bg-white border border-gray-300 text-black rounded-md p-2 text-sm shadow-sm">
+                      <div className="chart-tooltip">
                         <p>{name}</p>
                         <p>Amount: {value}</p>
                       </div>
@@ -234,11 +241,6 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={difficultyData}
-                  width={useMemo(
-                    () => Math.max(300, difficultyData.length * 120),
-                    [difficultyData]
-                  )}
-                  height={300}
                   accessibilityLayer
                 >
                   <XAxis
@@ -253,7 +255,7 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
                       if (!active || !payload || !payload.length) return null;
                       const { name, value } = payload[0].payload;
                       return (
-                        <div className="bg-white border border-gray-300 text-black rounded-md p-2 text-sm shadow-sm">
+                        <div className="chart-tooltip">
                           <p className="capitalize">
                             {name}: {value}
                           </p>
@@ -263,11 +265,12 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
                   />
                   <Bar dataKey="value" barSize={60}>
                     {difficultyData.map((difficulty, index) => {
-                      let fill = difficulty.fill;
-                      if (difficulty.name === "easy") fill = "#22c55e";
-                      else if (difficulty.name === "medium") fill = "#facc15";
-                      else if (difficulty.name === "hard") fill = "#ef4444";
-                      return <Cell key={`cell-${index}`} fill={fill} />;
+                      return (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={difficulty.fill}
+                        />
+                      );
                     })}
                   </Bar>
                 </BarChart>
