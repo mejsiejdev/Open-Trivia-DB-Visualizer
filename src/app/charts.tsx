@@ -144,6 +144,7 @@ export function Charts({ data }: { data: TriviaQuestion[] }) {
                 key={category.name}
                 className={cn(
                   "category-filter-button",
+                  "text-white",
                   selectedCategories.length > 0 &&
                     !selectedCategories.includes(category.name) &&
                     "opacity-50"
